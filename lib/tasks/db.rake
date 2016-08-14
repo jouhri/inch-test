@@ -26,9 +26,9 @@ namespace :db do
         created_at = Time.now.strftime("%Y-%m-%d %H:%M:%S")
 
         if references.include?(row["reference"])
-          model.where("reference = ? ", row["reference"]).first.update_attributes(row.to_hash)
+          model.where("reference = ? ", row["reference"]).first.update_attributes(row.to_hash.slice(model.attribute_names))
         else
-          res = model.create(row.to_hash)
+          res = model.create(row.to_hash.slice(model.attribute_names))
           puts "ERROR on reference #{row["reference"]} ==> " + res.errors.full_messages.join(",") unless res.errors.full_messages.empty?
           # sql_values  = row.fields.map{ |v| ActiveRecord::Base.connection.quote(v)}
           # sql_request_insert += " (#{sql_values.join(', ')}, '#{created_at}', '#{created_at}'),"
