@@ -26,8 +26,8 @@ namespace :db do
                 INSERT INTO #{model} (#{row.headers.join(',')}, created_at, updated_at)
                 VALUES (#{sql_values.join(', ')}, '#{created_at}',  '#{created_at}')
          "
-         puts sql
          res = ActiveRecord::Base.connection.execute(sql)
+         byebug
          ActiveRecord::Base.connection.last_inserted_id(res)
       end
     else
