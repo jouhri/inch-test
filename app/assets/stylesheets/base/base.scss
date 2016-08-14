@@ -1,0 +1,17 @@
+@import 'tools/colors';
+
+body {
+  background-color: $main-bg-color;
+
+  a, a:hover {
+    color: blue;
+    background-color: transparent;
+    color: black;
+    text-decoration: none;
+  }
+
+  p, ol, ul, td {
+    font-size: 13px;
+    line-height: 18px;
+  }
+}
