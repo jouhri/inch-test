@@ -5,7 +5,7 @@ namespace :db do
   task :import_csv, [:model, :file_path] => [:environment] do |t, args|
     if args[:model] && args[:file_path]
       begin
-        Module.const_get(args[:model])
+        model = Module.const_get(args[:model])
       rescue
         puts "ERROR: undefined model #{args[:model]}"
         exit 0
@@ -17,21 +17,26 @@ namespace :db do
         exit 0
       end
 
-      model = args[:model].downcase.pluralize
+      #headers = data[0].headers
+      #sql_request_insert = "INSERT INTO #{model.to_s.downcase.pluralize} (#{headers.join(',')}, created_at, updated_at)  VALUES "
+
+      references = model.pluck(:reference)
 
       data.each do | row |
-         created_at = Time.now.strftime("%Y-%m-%d %H:%M:%S")
-         sql_values  = row.fields.map{ |v| ActiveRecord::Base.connection.quote(v)}
-         sql = "
-                INSERT INTO #{model} (#{row.headers.join(',')}, created_at, updated_at)
-                VALUES (#{sql_values.join(', ')}, '#{created_at}',  '#{created_at}')
-         "
-         res = ActiveRecord::Base.connection.execute(sql)
-         byebug
-         ActiveRecord::Base.connection.last_inserted_id(res)
+        created_at = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+
+        if references.include?(row["reference"])
+          model.where("reference = ? ", row["reference"]).first.update_attributes(row.to_hash)
+        else
+          res = model.create(row.to_hash)
+          puts "ERROR on reference #{row["reference"]} ==> " + res.errors.full_messages.join(",") unless res.errors.full_messages.empty?
+          # sql_values  = row.fields.map{ |v| ActiveRecord::Base.connection.quote(v)}
+          # sql_request_insert += " (#{sql_values.join(', ')}, '#{created_at}', '#{created_at}'),"
+          # ActiveRecord::Base.connection.execute(sql_request_insert.chomp(','))
+        end
       end
     else
-      puts "ERROR: \nArgements is missing ==> rake 'db:import_csv[model, file_path]'"
+      puts "ERROR: \n Argements is missing ==> rake 'db:import_csv[model, file_path]'"
     end
   end
 end
