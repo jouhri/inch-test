@@ -15,6 +15,8 @@ gem 'turbolinks'
 gem 'sprockets', '3.6.3'
 gem 'jbuilder', '~> 2.0'
 
+gem 'redis-rails'
+
 gem 'sdoc', '~> 0.4.0', group: :doc
 group :development, :test do
 
