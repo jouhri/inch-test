@@ -17,13 +17,13 @@ namespace :db do
         exit 0
       end
 
+      references = model.pluck(:reference)
+
       data.each do | row |
-        row.headers.each do | header |
-          key = "#{model}:#{row["reference"]}:#{header}"
-          unless $redis.zscore(key, row[header])
-            index = $redis.zcard(key)
-            $redis.zadd(key, index, row[header])
-          end
+        if references.include?(row["reference"])
+          model.where("reference = ? ", row["reference"]).first.update(row.to_hash)
+        else
+          res = model.create(row.to_hash)
         end
       end
     else

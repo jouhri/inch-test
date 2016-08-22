@@ -19,10 +19,10 @@ module InchTest
   class Application < Rails::Application
       config.generators.helper = false
 
-  config.generators do |g|
-      g.test_framework    :rspec, fixture: true, routing: true
-      g.javascript_engine :js
-  end
+    config.generators do |g|
+        g.test_framework    :rspec, fixture: true, routing: true
+        g.javascript_engine :js
+    end
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -40,6 +40,8 @@ module InchTest
     config.active_record.raise_in_transactional_callbacks = true
 
     config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 90.minutes }
+
+    config.autoload_paths << Rails.root.join('lib')
 
   end
 end

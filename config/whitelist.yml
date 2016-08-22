@@ -1,0 +1,8 @@
+Person:
+  - email
+  - mobile_phone_number
+  - home_phone_number
+  - address
+
+Building:
+  - manager_name
