@@ -17,22 +17,13 @@ namespace :db do
         exit 0
       end
 
-      #headers = data[0].headers
-      #sql_request_insert = "INSERT INTO #{model.to_s.downcase.pluralize} (#{headers.join(',')}, created_at, updated_at)  VALUES "
-
-      references = model.pluck(:reference)
-
       data.each do | row |
-        created_at = Time.now.strftime("%Y-%m-%d %H:%M:%S")
-
-        if references.include?(row["reference"])
-          model.where("reference = ? ", row["reference"]).first.update_attributes(row.to_hash.slice(model.attribute_names))
-        else
-          res = model.create(row.to_hash.slice(model.attribute_names))
-          puts "ERROR on reference #{row["reference"]} ==> " + res.errors.full_messages.join(",") unless res.errors.full_messages.empty?
-          # sql_values  = row.fields.map{ |v| ActiveRecord::Base.connection.quote(v)}
-          # sql_request_insert += " (#{sql_values.join(', ')}, '#{created_at}', '#{created_at}'),"
-          # ActiveRecord::Base.connection.execute(sql_request_insert.chomp(','))
+        row.headers.each do | header |
+          key = "#{model}:#{row["reference"]}:#{header}"
+          unless $redis.zscore(key, row[header])
+            index = $redis.zcard(key)
+            $redis.zadd(key, index, row[header])
+          end
         end
       end
     else
